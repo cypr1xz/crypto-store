@@ -3,147 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Store | Premium Goods</title>
-    <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.12.0/tsparticles.confetti.bundle.min.js"></script>
+    <title>Premium Digital | LTC Store</title>
     <style>
         :root {
-            --primary: #7289da;
-            --bg: #0f0f12;
-            --card: rgba(255, 255, 255, 0.05);
-            --text: #ffffff;
+            --accent: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background: #050505;
+            color: white;
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
         }
 
-        /* Snow Background */
-        #snow-canvas {
+        /* Snow Effect */
+        #snow {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 20px;
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
             text-align: center;
         }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
+        h1 {
+            font-size: 3rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
         }
 
-        .tab-btn {
-            background: var(--card);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            padding: 12px 30px;
+        /* Tabs */
+        .tab-nav {
+            display: inline-flex;
+            background: var(--glass);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 50px;
+        }
+
+        .tab-nav button {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 10px 25px;
             cursor: pointer;
             border-radius: 8px;
+            font-weight: 600;
             transition: 0.3s;
-            font-weight: bold;
         }
 
-        .tab-btn.active {
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
+        .tab-nav button.active {
+            background: var(--accent);
+            color: #000;
         }
 
-        /* Grid & Cards */
+        /* Product Cards */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
 
-        .card {
-            background: var(--card);
+        .product-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backdrop-filter: blur(10px);
+        }
+
+        .product-card:hover {
+            transform: scale(1.03);
+            border-color: var(--accent);
+            box-shadow: 0 10px 40px rgba(0, 210, 255, 0.1);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .product-info {
             padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-color: var(--primary);
-        }
-
-        .price {
-            font-size: 1.5rem;
-            color: #43b581;
-            margin: 10px 0;
+        .price-tag {
+            color: var(--accent);
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 15px 0;
         }
 
         .buy-btn {
-            background: var(--primary);
-            color: white;
+            background: white;
+            color: black;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-weight: bold;
+            transition: 0.3s;
         }
 
-        /* Modal / Checkout Steps */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        .buy-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
         }
 
-        .modal-content {
-            background: #1a1a1e;
-            padding: 30px;
+        /* Vouch Section */
+        .vouch-card {
+            background: var(--glass);
+            padding: 20px;
             border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-        }
-
-        .step { display: none; }
-        .step.active { display: block; }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            background: #2f3136;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .ltc-address {
-            background: #000;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            word-break: break-all;
-            border: 1px dashed var(--primary);
-            margin: 10px 0;
+            border-left: 4px solid var(--accent);
+            text-align: left;
+            margin-bottom: 15px;
         }
 
         .hidden { display: none; }
@@ -151,159 +144,155 @@
 </head>
 <body>
 
-    <canvas id="snow-canvas"></canvas>
+    <canvas id="snow"></canvas>
 
     <div class="container">
-        <h1>✨ Digital Premium Store</h1>
-        
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('products')">Products</button>
-            <button class="tab-btn" onclick="showTab('vouches')">Vouches</button>
+        <h1>PREMIUM DEPOT</h1>
+
+        <div class="tab-nav">
+            <button id="prodBtn" class="active" onclick="switchTab('products')">Inventory</button>
+            <button id="vouchBtn" onclick="switchTab('vouches')">Reputation</button>
         </div>
 
-        <div id="products" class="tab-content">
+        <div id="productsSection">
             <div class="grid">
-                <div class="card">
-                    <h3>Discord Nitro</h3>
-                    <p>1 Month Full Subscription</p>
-                    <div class="price">$5.50</div>
-                    <button class="buy-btn" onclick="openCheckout('Discord Nitro')">Purchase</button>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1614680376593-902f74cf0d41?auto=format&fit=crop&w=500&q=80" class="product-img" alt="Nitro">
+                    <div class="product-info">
+                        <h3>Discord Nitro</h3>
+                        <p>Full 1 Month Subscription</p>
+                        <div class="price-tag">$5.50 LTC</div>
+                        <button class="buy-btn" onclick="openCheckout('Discord Nitro', 5.50)">Purchase Now</button>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>14x Server Boosts</h3>
-                    <p>3 Months Duration</p>
-                    <div class="price">$12.00</div>
-                    <button class="buy-btn" onclick="openCheckout('14x Boosts')">Purchase</button>
-                </div>
-                <div class="card">
-                    <h3>Robux (1k - 2k)</h3>
-                    <p>Clean / Fast Delivery</p>
-                    <div class="price">From $8.00</div>
-                    <button class="buy-btn" onclick="openCheckout('Robux Bundle')">Purchase</button>
-                </div>
-                <div class="card">
-                    <h3>Rocket League Credits</h3>
-                    <p>Instant Trade</p>
-                    <div class="price">$4.50</div>
-                    <button class="buy-btn" onclick="openCheckout('RL Credits')">Purchase</button>
+
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?auto=format&fit=crop&w=500&q=80" class="product-img" alt="Boosts">
+                    <div class="product-info">
+                        <h3>14x Server Boosts</h3>
+                        <p>Boost your server to Level 3</p>
+                        <div class="price-tag">$12.00 LTC</div>
+                        <button class="buy-btn" onclick="openCheckout('14x Boosts', 12.00)">Purchase Now</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="vouches" class="tab-content hidden">
-            <div class="grid">
-                <div class="card"><p>"Vouch! Got my Nitro in 2 mins."<br><strong>- User123</strong></p></div>
-                <div class="card"><p>"Cheapest Robux on the market."<br><strong>- BloxGuy</strong></p></div>
+        <div id="vouchesSection" class="hidden">
+            <div class="vouch-card">
+                <p>"Fastest delivery I've ever had for Nitro. 10/10."</p>
+                <small>— @VaderX (Verified Buyer)</small>
             </div>
-        </div>
-    </div>
-
-    <div id="checkoutModal" class="modal">
-        <div class="modal-content">
-            <div id="step1" class="step active">
-                <h3>Step 1: Your Details</h3>
-                <p id="item-name"></p>
-                <input type="email" id="emailInput" placeholder="Enter your email" required>
-                <button class="buy-btn" onclick="nextStep(2)">Proceed to Payment</button>
-            </div>
-
-            <div id="step2" class="step">
-                <h3>Step 2: Payment (LTC)</h3>
-                <p>Send exactly the amount to:</p>
-                <div class="ltc-address">LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg</div>
-                <p style="font-size: 0.8rem; color: #aaa;">Status: Waiting for confirmation...</p>
-                <button class="buy-btn" onclick="simulatePayment()">I have sent the money</button>
-            </div>
-
-            <div id="step3" class="step">
-                <h3>Step 3: Success! ✅</h3>
-                <p>Payment Received. Your product will be sent to your email shortly.</p>
-                <button class="buy-btn" onclick="closeModal()">Close</button>
+            <div class="vouch-card">
+                <p>"The 14x boosts worked perfectly. Server hit Level 3 instantly."</p>
+                <small>— @KrystalDev (Verified Buyer)</small>
             </div>
         </div>
     </div>
 
     <script>
-        // Snow Effect
-        const canvas = document.getElementById('snow-canvas');
+        // Snow Script
+        const canvas = document.getElementById('snow');
         const ctx = canvas.getContext('2d');
-        let particles = [];
+        let width, height, flakes = [];
 
-        function initSnow() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            for (let i = 0; i < 100; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    r: Math.random() * 3 + 1,
-                    d: Math.random() * 1
-                });
-            }
+        function init() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            flakes = [];
+            for(let i=0; i<150; i++) flakes.push({x: Math.random()*width, y: Math.random()*height, r: Math.random()*2+1, d: Math.random()*1});
         }
 
-        function drawSnow() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "white";
+        function draw() {
+            ctx.clearRect(0,0,width,height);
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
             ctx.beginPath();
-            for (let p of particles) {
-                ctx.moveTo(p.x, p.y);
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
-            }
+            flakes.forEach(f => {
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+            });
             ctx.fill();
-            moveSnow();
+            flakes.forEach(f => {
+                f.y += Math.cos(f.d) + 1 + f.r/2;
+                if(f.y > height) f.y = -10, f.x = Math.random()*width;
+            });
+            requestAnimationFrame(draw);
         }
 
-        function moveSnow() {
-            for (let p of particles) {
-                p.y += Math.cos(p.d) + 1 + p.r / 2;
-                p.x += Math.sin(0) * 2;
-                if (p.y > canvas.height) {
-                    p.x = Math.random() * canvas.width;
-                    p.y = -10;
-                }
+        window.addEventListener('resize', init);
+        init(); draw();
+
+        // Tabs
+        function switchTab(type) {
+            if(type === 'products') {
+                document.getElementById('productsSection').classList.remove('hidden');
+                document.getElementById('vouchesSection').classList.add('hidden');
+                document.getElementById('prodBtn').classList.add('active');
+                document.getElementById('vouchBtn').classList.remove('active');
+            } else {
+                document.getElementById('productsSection').classList.add('hidden');
+                document.getElementById('vouchesSection').classList.remove('hidden');
+                document.getElementById('prodBtn').classList.remove('active');
+                document.getElementById('vouchBtn').classList.add('active');
             }
         }
 
-        setInterval(drawSnow, 30);
-        window.addEventListener('resize', initSnow);
-        initSnow();
-
-        // Tabs Logic
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.remove('hidden');
-            event.currentTarget.classList.add('active');
-        }
-
-        // Checkout Logic
-        function openCheckout(name) {
-            document.getElementById('item-name').innerText = "Purchasing: " + name;
-            document.getElementById('checkoutModal').style.display = 'flex';
-        }
-
-        function nextStep(stepNum) {
-            if(stepNum === 2 && !document.getElementById('emailInput').value) {
-                alert("Please enter email"); return;
-            }
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + stepNum).classList.add('active');
-        }
-
-        function simulatePayment() {
-            // In a real site, you'd use a WebSocket or API to check the LTC ID
-            const btn = event.target;
-            btn.innerText = "Verifying Transaction...";
-            setTimeout(() => {
-                nextStep(3);
-            }, 3000);
-        }
-
-        function closeModal() {
-            document.getElementById('checkoutModal').style.display = 'none';
-            nextStep(1); // Reset for next time
+        // Open Checkout in New Tab (Simulated)
+        function openCheckout(name, price) {
+            const ltcAddress = "LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg";
+            const checkoutHTML = `
+                <html>
+                <head>
+                    <title>Secure Checkout | ${name}</title>
+                    <style>
+                        body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 400px; }
+                        input { width: 100%; padding: 12px; margin: 20px 0; background: #000; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+                        .btn { background: #00d2ff; color: black; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+                        .addr { background: #000; padding: 15px; border: 1px dashed #00d2ff; font-family: monospace; font-size: 12px; word-break: break-all; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="box" id="content">
+                        <h2>Step 1: Contact</h2>
+                        <p>Purchasing ${name} for $${price}</p>
+                        <input type="email" id="email" placeholder="Your Email">
+                        <button class="btn" onclick="next()">Continue</button>
+                    </div>
+                    <script>
+                        function next() {
+                            const email = document.getElementById('email').value;
+                            if(!email) return alert('Email required');
+                            document.getElementById('content').innerHTML = \`
+                                <h2>Step 2: Payment</h2>
+                                <p>Send exactly $${price} in LTC to:</p>
+                                <div class="addr">${ltcAddress}</div>
+                                <button class="btn" id="verifyBtn" onclick="verify()">I have sent the money</button>
+                            \`;
+                        }
+                        function verify() {
+                            const btn = document.getElementById('verifyBtn');
+                            btn.innerText = "Scanning Blockchain...";
+                            btn.style.background = "#555";
+                            
+                            // This simulates the AI checking the transaction
+                            setTimeout(() => {
+                                document.getElementById('content').innerHTML = \`
+                                    <h2 style="color: #00d2ff">Payment Found!</h2>
+                                    <p>Processing order for \${document.getElementById('email')?.value || 'user'}...</p>
+                                    <p>The product will be sent from <b>leng77166@gmail.com</b> within 5-10 minutes.</p>
+                                    <button class="btn" onclick="window.close()">Finish</button>
+                                \`;
+                            }, 4000);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            const newWindow = window.open();
+            newWindow.document.write(checkoutHTML);
         }
     </script>
 </body>
