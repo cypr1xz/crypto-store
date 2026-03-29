@@ -18,15 +18,18 @@
         .product-card:hover { border-color: var(--accent); transform: translateY(-5px); }
         .price-tag { font-size: 1.5rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
         .buy-btn { background: white; color: black; border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
-        .buy-btn:hover { background: var(--accent); color: white; }
-        .drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%; background: #0b0b0d; z-index: 1000; transition: 0.5s; padding: 50px 40px; box-sizing: border-box; border-left: 1px solid var(--border); }
+        .buy-btn:hover:not(:disabled) { background: var(--accent); color: white; }
+        .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; background: #222; color: #555; }
+        .drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%; background: #0b0b0d; z-index: 1000; transition: 0.5s; padding: 50px 40px; box-sizing: border-box; border-left: 1px solid var(--border); overflow-y: auto; }
         .drawer.active { right: 0; }
         .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; display: none; }
         .checkout-step { display: none; }
         .checkout-step.active { display: block; }
         input, textarea, select { width: 100%; padding: 14px; margin-bottom: 20px; background: #141417; border: 1px solid #222; color: white; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
-        select { appearance: none; cursor: pointer; }
-        .ltc-box { background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); word-break: break-all; color: var(--accent); cursor: pointer; margin-bottom: 20px; }
+        .instruction-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; border: 1px solid #222; font-size: 0.85rem; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
+        .ltc-box { background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); word-break: break-all; color: var(--accent); cursor: pointer; margin-bottom: 20px; display: none; }
+        .checkbox-container { display: flex; align-items: flex-start; gap: 10px; text-align: left; margin-bottom: 20px; font-size: 0.85rem; color: #ddd; cursor: pointer; }
+        .checkbox-container input { width: auto; margin: 0; margin-top: 3px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -41,36 +44,44 @@
                 <input type="hidden" name="Item" id="hiddenItem">
                 
                 <label>Discord Username</label>
-                <input type="text" name="Discord_User" id="discUser" placeholder="e.g. destiny1xz" required>
+                <input type="text" name="Discord_User" id="discUser" placeholder="e.g. destiny1xz" oninput="validateStep1()">
                 
-                <div id="dynamicFields">
-                    <label>Payment Method</label>
-                    <select name="Payment_Method" required>
-                        <option value="LTC">Ł Litecoin (LTC)</option>
-                    </select>
-                </div>
+                <div id="dynamicFields"></div>
                 
-                <button type="button" class="buy-btn" onclick="sendData()">Continue</button>
+                <button type="button" class="buy-btn" id="step1Btn" disabled onclick="sendData()">Continue</button>
             </form>
         </div>
+
         <div id="step2" class="checkout-step">
-            <h2>LTC Payment</h2>
-            <p style="color: #888; font-size: 0.9rem;">Copy the address below and send the payment.</p>
-            <div class="ltc-box" onclick="navigator.clipboard.writeText('LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg'); alert('LTC Address Copied!')">LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg</div>
+            <h2>Payment Steps</h2>
+            <div class="instruction-box">
+                Please wait until the seller adds you on Discord after payment. You must provide the transaction hash below so we can verify the blockchain.
+            </div>
+
+            <label class="checkbox-container">
+                <input type="checkbox" id="agreeCheck" onchange="toggleLTC()">
+                <span>I understand that I must wait for the seller to add me and I have the funds ready.</span>
+            </label>
+
+            <div id="ltcArea" class="ltc-box" onclick="copyAddress()">
+                LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg
+                <div style="font-size: 0.6rem; margin-top: 5px; color: #666;">(Click to copy)</div>
+            </div>
             
             <label>Transaction Hash / ID</label>
-            <input type="text" id="txnID" placeholder="Paste Hash here" oninput="document.getElementById('vBtn').disabled = !this.value">
+            <input type="text" id="txnID" placeholder="Paste Hash here" oninput="validateStep2()">
+            
             <button class="buy-btn" id="vBtn" disabled onclick="showSuccess()">I have sent the money</button>
         </div>
+
         <div id="step3" class="checkout-step">
-            <h2 style="color: var(--accent);">Success! ✅</h2>
+            <h2 style="color: var(--accent);">Request Sent! ✅</h2>
             <div id="successMsg" style="background: rgba(0,210,255,0.05); padding: 15px; border-radius: 10px;"></div>
-            <div style="margin-top: 20px; background: #1a1a1f; padding: 15px; border-radius: 10px; border: 1px solid #333;">
-                <p style="margin:0; font-size:0.7rem; color:#666;">SELLER CONTACT:</p>
-                <code style="font-size: 1.1rem;">destiny1xz</code>
+            <div style="margin-top: 20px; background: #1a1a1f; padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: center;">
+                <code id="sellerName" style="font-size: 1.1rem;">destiny1xz</code>
                 <button onclick="navigator.clipboard.writeText('destiny1xz'); alert('Discord Copied!')" style="background: var(--accent); border:none; padding: 5px 10px; border-radius: 5px; font-weight:bold; cursor:pointer; margin-left: 10px;">Copy</button>
             </div>
-            <button class="buy-btn" style="margin-top:20px" onclick="closeCheckout()">Close</button>
+            <button class="buy-btn" style="margin-top:20px" onclick="closeCheckout()">Finish</button>
         </div>
     </div>
 
@@ -81,27 +92,78 @@
             <button onclick="show('decor', this)">Decor</button>
             <button onclick="show('vouches', this)">Vouches</button>
         </div>
-        <div id="products"><div class="grid">
-            <div class="product-card"><h3>Discord Nitro</h3><p>1 Month Full Subscription</p><div class="price-tag">$5.50</div><button class="buy-btn" onclick="openCheckout('Nitro', 'Standard')">Buy Now</button></div>
-            <div class="product-card"><h3>14x Server Boosts</h3><p>3 Months Level 3 Perks</p><div class="price-tag">$3.00</div><button class="buy-btn" onclick="openCheckout('Nitro', '14x Boosts')">Buy Now</button></div>
-        </div></div>
-        <div id="decor" class="hidden"><div class="product-card" style="text-align:center;"><h3>Custom Decor</h3><p>Describe your vision for a price quote.</p><button class="buy-btn" onclick="openCheckout('Decor', 'Custom Request')">Start Request</button></div></div>
-        <div id="vouches" class="hidden"><div class="grid"><div class="product-card"><p>"Legit and fast." - zanderr</p></div><div class="product-card"><p>"Cheap prices work 100%." - K1ng</p></div></div></div>
+
+        <div id="products">
+            <div class="grid">
+                <div class="product-card">
+                    <h3>Discord Nitro</h3><p>1 Month Full Subscription</p>
+                    <div class="price-tag">$5.50 LTC</div>
+                    <button class="buy-btn" onclick="openCheckout('Nitro', 'Standard')">Purchase</button>
+                </div>
+                <div class="product-card">
+                    <h3>14x Server Boosts</h3><p>3 Months Level 3</p>
+                    <div class="price-tag">$3.00 LTC</div>
+                    <button class="buy-btn" onclick="openCheckout('Nitro', '14x Boosts')">Purchase</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="decor" class="hidden">
+            <div class="product-card" style="text-align:center;">
+                <h3>Custom Decor</h3><p>Get a custom price for your profile theme.</p>
+                <button class="buy-btn" onclick="openCheckout('Decor', 'Custom Request')">Request Quote</button>
+            </div>
+        </div>
+
+        <div id="vouches" class="hidden">
+            <div class="grid">
+                <div class="product-card"><p>"Legit and fast." - zanderr</p></div>
+                <div class="product-card"><p>"Cheapest prices." - K1ng</p></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const formURL = "https://formspree.io/f/xaqlejgn";
+
+        // Validation Logic
+        function validateStep1() {
+            const user = document.getElementById('discUser').value.trim();
+            document.getElementById('step1Btn').disabled = user.length < 2;
+        }
+
+        function toggleLTC() {
+            const isChecked = document.getElementById('agreeCheck').checked;
+            document.getElementById('ltcArea').style.display = isChecked ? 'block' : 'none';
+            validateStep2();
+        }
+
+        function validateStep2() {
+            const isChecked = document.getElementById('agreeCheck').checked;
+            const hash = document.getElementById('txnID').value.trim();
+            document.getElementById('vBtn').disabled = !(isChecked && hash.length > 5);
+        }
+
+        function copyAddress() {
+            navigator.clipboard.writeText('LKwkUrfjqATvHW1gMxVBr6KbRDwNiNJRrg');
+            alert('LTC Address Copied!');
+        }
+
+        // Snow Effect
         const canvas = document.getElementById('snow'); const ctx = canvas.getContext('2d');
-        let w, h, p = []; function init() { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; p=[]; for(let i=0;i<60;i++) p.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+0.5}); }
-        function draw() { ctx.clearRect(0,0,w,h); ctx.fillStyle="rgba(255,255,255,0.3)"; ctx.beginPath(); p.forEach(i=>{ctx.moveTo(i.x,i.y); ctx.arc(i.x,i.y,i.r,0,Math.PI*2);}); ctx.fill(); p.forEach(i=>{i.y+=0.35; if(i.y>h)i.y=-10;}); requestAnimationFrame(draw); }
+        let w, h, p = []; function init() { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; p=[]; for(let i=0;i<50;i++) p.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+0.5}); }
+        function draw() { ctx.clearRect(0,0,w,h); ctx.fillStyle="rgba(255,255,255,0.25)"; ctx.beginPath(); p.forEach(i=>{ctx.moveTo(i.x,i.y); ctx.arc(i.x,i.y,i.r,0,Math.PI*2);}); ctx.fill(); p.forEach(i=>{i.y+=0.3; if(i.y>h)i.y=-10;}); requestAnimationFrame(draw); }
         init(); draw(); window.onresize=init;
 
         function show(id, btn) { ['products','decor','vouches'].forEach(x=>document.getElementById(x).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); document.querySelectorAll('.tab-nav button').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); }
+        
         function openCheckout(t,i) { 
             document.getElementById('hiddenType').value=t; 
             document.getElementById('hiddenItem').value=i; 
             document.getElementById('item-title').innerText = (t==='Decor') ? 'Decor Request' : i;
-            
+            document.getElementById('discUser').value = "";
+            document.getElementById('step1Btn').disabled = true;
+
             const fields = document.getElementById('dynamicFields');
             if(t==='Decor') {
                 fields.innerHTML = `<label>Describe your theme</label><textarea name="Message" placeholder="Colors, icons, or style..." required></textarea>`;
@@ -112,19 +174,35 @@
             document.getElementById('drawer').classList.add('active'); 
             document.getElementById('overlay').style.display='block'; 
         }
-        function closeCheckout() { document.getElementById('drawer').classList.remove('active'); document.getElementById('overlay').style.display='none'; document.getElementById('step1').classList.add('active'); document.getElementById('step2').classList.remove('active'); document.getElementById('step3').classList.remove('active'); }
+
+        function closeCheckout() { 
+            document.getElementById('drawer').classList.remove('active'); 
+            document.getElementById('overlay').style.display='none'; 
+            document.querySelectorAll('.checkout-step').forEach(s=>s.classList.remove('active'));
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('agreeCheck').checked = false;
+            document.getElementById('txnID').value = "";
+            document.getElementById('ltcArea').style.display = 'none';
+        }
         
         async function sendData() { 
             const t=document.getElementById('hiddenType').value; 
+            const btn = document.getElementById('step1Btn');
+            btn.innerText = "Processing...";
             await fetch(formURL,{method:'POST',body:new FormData(document.getElementById('purchaseForm')),headers:{'Accept':'application/json'}}); 
-            if(t==='Decor') showSuccess('decor'); 
-            else { document.getElementById('step1').classList.remove('active'); document.getElementById('step2').classList.add('active'); } 
+            if(t==='Decor') {
+                showSuccess('decor'); 
+            } else { 
+                document.getElementById('step1').classList.remove('active'); 
+                document.getElementById('step2').classList.add('active'); 
+            }
+            btn.innerText = "Continue";
         }
         
         function showSuccess(m) { 
             document.querySelectorAll('.checkout-step').forEach(s=>s.classList.remove('active')); 
             document.getElementById('step3').classList.add('active'); 
-            document.getElementById('successMsg').innerHTML = (m==='decor') ? "Your request was sent! Please wait for <b>destiny1xz</b> to add you on Discord for the quote." : "Payment notification sent. Please wait for <b>destiny1xz</b> to send you a friend request!"; 
+            document.getElementById('successMsg').innerHTML = (m==='decor') ? "Your request was received. <b>destiny1xz</b> will add you shortly to discuss pricing." : "Payment notification sent. Please wait for the seller to send you a friend request!"; 
         }
     </script>
 </body>
