@@ -6,168 +6,184 @@
     <title>The Best Server</title>
     <style>
         :root {
-            --primary: #5865F2; /* Discord Blue */
-            --accent: #00d9ff;
-            --bg: #0f0f13;
+            --primary: #5865F2;
+            --accent: #ff0055; /* Neon Pink/Red for the cursor */
+            --bg: #050505;
         }
 
-        body, html {
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            box-sizing: border-box;
+            cursor: none; /* Hide real cursor */
+        }
+
+        body {
             background-color: var(--bg);
             color: white;
-            font-family: 'Inter', sans-serif, Arial;
-            overflow: hidden; /* Prevents scrollbars from breaking the vibe */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
-        /* --- Custom Cursor --- */
-        #cursor {
-            width: 25px;
-            height: 25px;
-            border: 2px solid var(--accent);
-            border-radius: 50%;
+        /* --- New Crosshair Cursor --- */
+        #cursor-main {
             position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
             pointer-events: none;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px var(--accent);
-            transition: transform 0.05s linear;
+            z-index: 9999;
+            transition: transform 0.1s ease-out, background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* --- Background Glow --- */
-        .glow {
-            position: absolute;
-            width: 50vw;
-            height: 50vw;
-            background: radial-gradient(circle, rgba(88, 101, 242, 0.2) 0%, rgba(0,0,0,0) 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
+        #cursor-dot {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
         }
 
-        /* --- Main Card --- */
-        .main-card {
-            position: relative;
-            z-index: 10;
+        /* --- Background Effects --- */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* --- Main Content --- */
+        .content {
             text-align: center;
-            padding: 3rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            z-index: 10;
         }
 
         h1 {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-            letter-spacing: -1px;
-            background: linear-gradient(90deg, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px var(--primary);
         }
 
-        .btn {
-            margin-top: 2rem;
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            font-weight: bold;
+        .server-btn {
+            background: transparent;
             color: white;
-            background: var(--primary);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3);
+            border: 2px solid white;
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 30px;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(88, 101, 242, 0.5);
-            background: #4752c4;
+        .server-btn:hover {
+            background: white;
+            color: black;
+            transform: scale(1.1);
+            box-shadow: 0 0 50px white;
         }
 
-        /* --- Infinite Text Passage --- */
-        .ticker-container {
-            position: absolute;
-            bottom: 20px;
+        /* --- Infinite Passage --- */
+        .ticker {
+            position: fixed;
+            bottom: 30px;
+            white-space: nowrap;
             width: 100%;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0;
         }
 
-        .ticker-text {
-            display: flex;
-            white-space: nowrap;
-            animation: scroll 20s linear infinite;
+        .ticker-inner {
+            display: inline-block;
+            animation: moveTicker 25s linear infinite;
         }
 
-        .ticker-text span {
-            font-size: 1.5rem;
-            font-weight: 800;
-            padding: 0 40px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
+        .ticker-inner span {
+            font-size: 2rem;
+            font-weight: 200;
+            padding: 0 50px;
+            opacity: 0.3;
         }
 
-        @keyframes scroll {
+        @keyframes moveTicker {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
+        }
+
+        /* --- Hover State for Cursor --- */
+        .hovering #cursor-main {
+            transform: scale(1.5);
+            background: rgba(255, 0, 85, 0.2);
+            border-color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <div id="cursor"></div>
-    <div class="glow"></div>
+    <div id="cursor-main"><div id="cursor-dot"></div></div>
+    <div class="bg-grid"></div>
 
-    <div class="main-card">
-        <h1>The Best Server</h1>
-        <p style="color: #888;">The community you've been looking for.</p>
-        <button class="btn" onclick="copyLink()">GET DISCORD INVITE</button>
-        <p id="msg" style="margin-top: 15px; color: var(--accent); font-weight: bold; visibility: hidden;">COPIED TO CLIPBOARD!</p>
+    <div class="content">
+        <h1>THE BEST SERVER</h1>
+        <p style="opacity: 0.6;">Stop searching. You found it.</p>
+        
+        <a href="https://discord.gg/nR94xXcY" class="server-btn" onmouseover="addHover()" onmouseout="removeHover()">
+            OPEN SERVER
+        </a>
     </div>
 
-    <div class="ticker-container">
-        <div class="ticker-text">
-            <span>THE BEST COMMUNITY</span>
-            <span>ACTIVE VC 24/7</span>
-            <span>CUSTOM BOTS</span>
-            <span>FRIENDLY STAFF</span>
-            <span>WEEKLY EVENTS</span>
-            <span>THE BEST COMMUNITY</span>
-            <span>ACTIVE VC 24/7</span>
-            <span>CUSTOM BOTS</span>
-            <span>FRIENDLY STAFF</span>
-            <span>WEEKLY EVENTS</span>
+    <div class="ticker">
+        <div class="ticker-inner">
+            <span>THE BEST SERVER</span>
+            <span>WHY IT'S THE BEST</span>
+            <span>NO ONE ELSE COMPARES</span>
+            <span>BEST COMMUNITY</span>
+            <span>JOIN NOW</span>
+            <span>THE BEST SERVER</span>
+            <span>WHY IT'S THE BEST</span>
+            <span>NO ONE ELSE COMPARES</span>
+            <span>BEST COMMUNITY</span>
+            <span>JOIN NOW</span>
         </div>
     </div>
 
     <script>
-        // Move the custom cursor
-        const cursor = document.getElementById('cursor');
-        window.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+        const cursor = document.getElementById('cursor-main');
+        
+        // Follow Mouse
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 20 + 'px';
+            cursor.style.top = e.clientY - 20 + 'px';
         });
 
-        // Copy function
-        function copyLink() {
-            const link = "https://discord.gg/yourlink"; // Put your real link here
-            navigator.clipboard.writeText(link);
-            
-            const msg = document.getElementById('msg');
-            msg.style.visibility = 'visible';
-            setTimeout(() => { msg.style.visibility = 'hidden'; }, 2000);
+        // Hover effect functions
+        function addHover() {
+            document.body.classList.add('hovering');
+        }
+
+        function removeHover() {
+            document.body.classList.remove('hovering');
         }
     </script>
 </body>
